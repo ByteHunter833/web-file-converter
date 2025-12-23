@@ -32,3 +32,34 @@ body {
     opacity: 0.9;
 }
 
+.converter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.converter-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.converter-card:hover {
+    transform: translateY(-5px);
+}
+
+.converter-card h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.converter-card p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
