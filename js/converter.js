@@ -104,3 +104,36 @@ function formatFileSize(bytes) {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
+async function loadPdfPages(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+
+    pdfPages = [];
+    const optionsArea = document.getElementById('optionsArea');
+    optionsArea.style.display = 'block';
+    optionsArea.innerHTML = '<h3>Sahifalarni tanlang:</h3><div class="page-preview" id="pagePreview"></div>';
+
+    const pagePreview = document.getElementById('pagePreview');
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+        pdfPages.push(i);
+        const pageDiv = document.createElement('div');
+        pageDiv.className = 'page-item selected';
+        pageDiv.innerHTML = `<p>Sahifa ${i}</p>`;
+        pageDiv.onclick = () => togglePage(i, pageDiv);
+        pagePreview.appendChild(pageDiv);
+    }
+}
+
+function togglePage(pageNum, element) {
+    const index = pdfPages.indexOf(pageNum);
+    if (index > -1) {
+        pdfPages.splice(index, 1);
+        element.classList.remove('selected');
+    } else {
+        pdfPages.push(pageNum);
+        element.classList.add('selected');
+    }
+    pdfPages.sort((a, b) => a - b);
+}
+
