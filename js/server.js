@@ -113,64 +113,6 @@ app.post(
 	}
 )
 
-//API emdpoint for converting PDF to TXT
-app.post('/api/convert/pdf-to-txt', upload.single('file'), async (req, res) => {
-	let inputPath = null
-	let outputPath = null
-
-	try {
-		if (!req.file) {
-			return res.status(400).json({ error: 'Файл не загружен' })
-		}
-
-		inputPath = req.file.path
-		const outputDir = path.dirname(inputPath)
-		const baseName = path.basename(inputPath, path.extname(inputPath))
-		outputPath = path.join(outputDir, `${baseName}.txt`)
-
-		console.log(`Конвертация: ${inputPath} -> ${outputPath}`)
-
-		const command = `libreoffice --headless --convert-to txt --outdir "${outputDir}" "${inputPath}"`
-
-		await execPromise(command, {
-			timeout: 60000, // 60 секунд таймаут
-			maxBuffer: 10 * 1024 * 1024,
-		})
-
-		// Проверяем существование выходного файла
-		try {
-			await fs.access(outputPath)
-		} catch {
-			throw new Error('TXT файл не был создан')
-		}
-
-		// Читаем TXT файл
-		const txtBuffer = await fs.readFile(outputPath)
-
-		// Отправляем файл клиенту
-		res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-		res.setHeader(
-			'Content-Disposition',
-			`attachment; filename="${baseName}.txt"`
-		)
-		res.send(txtBuffer)
-	} catch (error) {
-		console.error('Ошибка конвертации:', error)
-		res.status(500).json({
-			error: 'Ошибка конвертации файла',
-			details: error.message,
-		})
-	} finally {
-		// Очистка временных файлов
-		try {
-			if (inputPath) await fs.unlink(inputPath).catch(() => {})
-			if (outputPath) await fs.unlink(outputPath).catch(() => {})
-		} catch (err) {
-			console.error('Ошибка очистки файлов:', err)
-		}
-	}
-})
-
 // API endpoint для конвертации множественных файлов
 app.post('/api/convert/batch', upload.array('files', 10), async (req, res) => {
 	const { operation } = req.body
